@@ -6,6 +6,8 @@ const User = require('../models/user');
 const InvalidDataError = require('../errors/invalid-data-err');
 const NotAuthorizedError = require('../errors/not-authorized-err');
 
+const { JWT_SECRET } = process.env;
+
 module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
@@ -46,7 +48,7 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, "dev", { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {
