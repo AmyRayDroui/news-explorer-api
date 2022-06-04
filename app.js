@@ -3,8 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 
-const usersRoute = require('./Routes/users');
-const articlesRoute = require('./Routes/articles');
+const usersRoute = require('./routes/users');
+const articlesRoute = require('./routes/articles');
 
 
 const { PORT = 3000 } = process.env;
