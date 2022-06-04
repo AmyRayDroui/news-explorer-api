@@ -1,6 +1,10 @@
+require('dotenv').config();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const InvalidDataError = require('../errors/invalid-data-err');
+const NotAuthorizedError = require('../errors/not-authorized-err');
 
 module.exports.getCurrentUser = async (req, res, next) => {
   try {
@@ -12,4 +16,40 @@ module.exports.getCurrentUser = async (req, res, next) => {
     }
     next(new Error('Server Error'));
   }
+};
+
+module.exports.createUser = async (req, res, next) => {
+  try {
+    console.log("Here");
+    const {
+      email, password, name,
+    } = req.body;
+    const hash = await bcrypt.hash(password, 10);
+    console.log(hash);
+    const user = await User.create({
+      email, password: hash, name,
+    });
+    res.send(user);
+  } catch (err) {
+    if (err.name === 'TypeError') {
+      next(new InvalidDataError('invalid data passed to the methods for creating a user'));
+    } if (err.name === 'MongoServerError') {
+      next(new InvalidDataError('This email is already registered in the program'));
+    } else {
+      next(new Error('Server Error'));
+    }
+  }
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, "dev", { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => {
+      next(new NotAuthorizedError(err.message));
+    });
 };
