@@ -22,12 +22,10 @@ module.exports.getCurrentUser = async (req, res, next) => {
 
 module.exports.createUser = async (req, res, next) => {
   try {
-    console.log("Here");
     const {
       email, password, name,
     } = req.body;
     const hash = await bcrypt.hash(password, 10);
-    console.log(hash);
     const user = await User.create({
       email, password: hash, name,
     });
