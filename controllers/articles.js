@@ -14,9 +14,13 @@ module.exports.getArticles = async (req, res, next) => {
 
 module.exports.createArticle = async (req, res, next) => {
   try {
-    const { keyword, title, text, date, source, link, image } = req.body;
+    const {
+      keyword, title, text, date, source, link, image,
+    } = req.body;
     const owner = req.user._id;
-    const article = await Article.create({ keyword, title, text, date, source, link, image, owner });
+    const article = await Article.create({
+      keyword, title, text, date, source, link, image, owner,
+    });
     res.send(article);
   } catch (err) {
     if (err.name === 'TypeError') {
@@ -31,13 +35,12 @@ module.exports.deleteArticle = async (req, res, next) => {
   try {
     const searchArticle = await Article.findById(req.params.articleId);
     if (searchArticle === null) {
-      console.log('Article not found');
       next(new NotFoundError('Article not found'));
     }
     if (req.user._id !== searchArticle.owner.toHexString()) {
       next(new NotAuthorizedError('Not the owner of the Article'));
     }
-    const card = await Card.findByIdAndRemove(req.params.id);
+    const card = await Article.findByIdAndRemove(req.params.id);
     res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
