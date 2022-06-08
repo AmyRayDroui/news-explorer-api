@@ -5,7 +5,7 @@ const NotFoundError = require('../errors/not-found-err');
 
 module.exports.getArticles = async (req, res, next) => {
   try {
-    const articles = await Article.find({})
+    const articles = await Article.find({ owner: req.user._id });
     res.send(articles);
   } catch (err) {
     next(new Error('Server Error'));
