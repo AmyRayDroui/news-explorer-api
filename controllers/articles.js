@@ -3,12 +3,17 @@ const InvalidDataError = require('../errors/invalid-data-err');
 const NotAuthorizedError = require('../errors/not-authorized-err');
 const NotFoundError = require('../errors/not-found-err');
 
+const {
+  INVALID_DATA_ARTICLE_ERROR_MESSAGE, ARTICLE_NOT_FOUND_ERROR_MESSAGE,
+  INVALID_ARTICLE_ERROR_MESSAGE, SERVER_ERROR_MESSAGE, NOT_AUTHORIZED_ARTICLE_ERROR_MESSAGE,
+} = require('../utils/constants');
+
 module.exports.getArticles = async (req, res, next) => {
   try {
     const articles = await Article.find({ owner: req.user._id });
     res.send(articles);
   } catch (err) {
-    next(new Error('Server Error'));
+    next(new Error(SERVER_ERROR_MESSAGE));
   }
 };
 
@@ -24,9 +29,9 @@ module.exports.createArticle = async (req, res, next) => {
     res.send(article);
   } catch (err) {
     if (err.name === 'TypeError') {
-      next(new InvalidDataError('invalid data passed to the methods for creating a article'));
+      next(new InvalidDataError(INVALID_DATA_ARTICLE_ERROR_MESSAGE));
     } else {
-      next(new Error('Server Error'));
+      next(new Error(SERVER_ERROR_MESSAGE));
     }
   }
 };
@@ -35,17 +40,17 @@ module.exports.deleteArticle = async (req, res, next) => {
   try {
     const searchArticle = await Article.findById(req.params.articleId);
     if (searchArticle === null) {
-      next(new NotFoundError('Article not found'));
+      next(new NotFoundError(ARTICLE_NOT_FOUND_ERROR_MESSAGE));
     }
     if (req.user._id !== searchArticle.owner.toHexString()) {
-      next(new NotAuthorizedError('Not the owner of the Article'));
+      next(new NotAuthorizedError(NOT_AUTHORIZED_ARTICLE_ERROR_MESSAGE));
     }
     const card = await Article.findByIdAndRemove(req.params.id);
     res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new InvalidDataError('invalid Article'));
+      next(new InvalidDataError(INVALID_ARTICLE_ERROR_MESSAGE));
     }
-    next(new Error('Server Error'));
+    next(new Error(SERVER_ERROR_MESSAGE));
   }
 };

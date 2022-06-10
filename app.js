@@ -2,61 +2,29 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 
-const auth = require('./middlewares/auth');
+const { limiter } = require('./middlewares/rateLimiter');
+const centralizedErrorHandler = require('./middlewares/centralizedErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { router } = require('./routes/index');
 
-const usersRoute = require('./routes/users');
-const articlesRoute = require('./routes/articles');
+const { PORT, DB_ADDRESS } = require('./utils/constants');
 
-const { createUser, login } = require('./controllers/users');
-
-const NotFoundError = require('./errors/not-found-err');
-
-const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/explorerdb');
+mongoose.connect(DB_ADDRESS);
 
+app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
-app.use(requestLogger);
+app.use(requestLogger);// adding the request logger
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().min(2),
-    password: Joi.string().required().min(2),
-    name: Joi.string().min(2).max(30),
-  }),
-}), createUser);
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().min(2),
-    password: Joi.string().required().min(2),
-  }),
-}), login);
+app.use(router);
 
-app.use(auth);
-
-app.use('/users', usersRoute);
-app.use('/articles', articlesRoute);
-app.get('/', () => {
-  throw new NotFoundError('Requested resource not found');
-});
-
-app.use(errorLogger);
+app.use(errorLogger);// adding the error logger
 app.use(errors());
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'An error occurred on the server'
-        : message,
-    });
-});
+app.use(centralizedErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening at port ${PORT}`);
