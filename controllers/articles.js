@@ -38,14 +38,14 @@ module.exports.createArticle = async (req, res, next) => {
 
 module.exports.deleteArticle = async (req, res, next) => {
   try {
-    const searchArticle = await Article.findById(req.params.articleId);
+    const searchArticle = await Article.findById(req.params.articleId).select('+owner');
     if (searchArticle === null) {
       next(new NotFoundError(ARTICLE_NOT_FOUND_ERROR_MESSAGE));
     }
     if (req.user._id !== searchArticle.owner.toHexString()) {
       next(new NotAuthorizedError(NOT_AUTHORIZED_ARTICLE_ERROR_MESSAGE));
     }
-    const card = await Article.findByIdAndRemove(req.params.id);
+    const card = await Article.findByIdAndRemove(req.params.articleId);
     res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {

@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const cors = require('cors');
 const { errors } = require('celebrate');
 
 const { limiter } = require('./middlewares/rateLimiter');
@@ -15,6 +16,8 @@ const app = express();
 
 mongoose.connect(DB_ADDRESS);
 
+app.use(cors());
+app.options('*', cors());
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());

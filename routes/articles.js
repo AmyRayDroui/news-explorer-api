@@ -8,7 +8,7 @@ router.get('/', getArticles);
 router.post('/', celebrate({
   body: Joi.object().keys({
     keyword: Joi.string().min(2),
-    title: Joi.string().min(2).max(30),
+    title: Joi.string().min(2),
     text: Joi.string().min(2),
     date: Joi.string().min(2),
     source: Joi.string().min(2),
@@ -20,7 +20,6 @@ router.delete('/:articleId', celebrate({
   params: Joi.object().keys({
     articleId: Joi.string().required().hex().length(24),
   }),
-  headers: Joi.object().keys({}).unknown(true),
 }), deleteArticle);
 
 module.exports = router;
