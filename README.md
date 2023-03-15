@@ -1,4 +1,4 @@
 # news-explorer-api
 
 You can access the server on this domain:
-    [api.amyexplorer.students.nomoreparties.sbs](https://api.amyexplorer.students.nomoreparties.sbs)
+    [api.amyray-newsexplorer.com](https://api.amyray-newsexplorer.com)
